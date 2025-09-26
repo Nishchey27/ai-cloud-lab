@@ -1,0 +1,14 @@
+# Use a slim version of the official Python image as our base
+FROM python:3.9-slim
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy the requirements file into the container
+COPY requirements.txt .
+
+# Install the Python libraries from the requirements file
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy all the rest of our project files into the container
+COPY . .
