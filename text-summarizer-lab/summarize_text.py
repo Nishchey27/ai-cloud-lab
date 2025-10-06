@@ -1,49 +1,39 @@
+# File Path: ai-cloud-lab/text-summarizer-lab/summarize_text.py
 import sys
 import json
+import PyPDF2
 from transformers import pipeline
 
-
-def summarize_text(file_path):
-    """
-    Summarizes the text content of a given file.
-
-    Args:
-        file_path (str): The path to the text file.
-
-    Returns:
-        dict: A dictionary containing the summary or an error message.
-    """
-    try:
-        # Load the content from the file
-        with open(file_path, 'r', encoding='utf-8') as f:
+def get_text_from_file(file_path: str) -> str:
+    text_content = ""
+    if file_path.lower().endswith('.pdf'):
+        with open(file_path, 'rb') as pdf_file:
+            reader = PyPDF2.PdfReader(pdf_file)
+            for page in reader.pages:
+                page_text = page.extract_text()
+                if page_text:
+                    text_content += page_text + "\n"
+    else:
+        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
             text_content = f.read()
+    return text_content
 
-        # Initialize the summarization pipeline from Hugging Face.
-        # 'sshleifer/distilbart-cnn-12-6' is a lightweight yet effective model.
+def summarize_text(file_path: str):
+    try:
+        text_to_summarize = get_text_from_file(file_path)
+        if not text_to_summarize.strip():
+            return {"error": f"Could not extract any text from the file: {file_path}"}
+
         summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
+        summary = summarizer(text_to_summarize, max_length=150, min_length=30, do_sample=False)
 
-        # Generate the summary
-        # We set a min and max length for a concise summary.
-        summary = summarizer(text_content, max_length=150, min_length=30, do_sample=False)
-
-        result = {
-            "original_char_count": len(text_content),
-            "summary": summary[0]['summary_text']
-        }
-
+        result = {"original_char_count": len(text_to_summarize), "summary": summary[0]['summary_text']}
         return result
-
-    except FileNotFoundError:
-        return {"error": f"Error: The file at {file_path} was not found."}
     except Exception as e:
         return {"error": f"An unexpected error occurred: {str(e)}"}
 
-
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python summarize_text.py <path_to_text_file>")
+        print(json.dumps({"error": "Usage: python summarize_text.py <path_to_file>"}, indent=4))
     else:
-        file_path = sys.argv[1]
-        summary_result = summarize_text(file_path)
-        # Output the result as a JSON string
-        print(json.dumps(summary_result, indent=4))
+        print(json.dumps(summarize_text(sys.argv[1]), indent=4))
