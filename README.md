@@ -39,7 +39,7 @@ This project demonstrates a novel approach to AI assistance. Instead of just pro
 
 ## 📝 A Note on the API Provider
 
-Our initial plan was to use the sponsor's Cerebras API. During development, we encountered a persistent, region-specific DNS issue. To ensure a functional project, we demonstrated adaptability by pivoting to the Groq API. Our `ai_brain.py` module is designed to be provider-agnostic.
+Our initial plan was to use the Cerebras API. During development, we encountered a persistent, region-specific DNS issue. To ensure a functional project, we demonstrated adaptability by pivoting to the Groq API. Our `ai_brain.py` module is designed to be provider-agnostic.
 
 ## 🎬 Demo Video
 
